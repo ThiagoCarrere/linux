@@ -9,6 +9,3 @@ echo "Iniciando Backup Espelho de pastas publicas"
 sleep 3 
 rsync -hvrP --delete root@192.168.0.200:/publica/ /rsyncDebian/
 
-
-
-
