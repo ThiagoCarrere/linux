@@ -1,8 +1,7 @@
 # 🐧 Laboratório de Testes Linux
 
-[![GitHub stars](https://img.shields.io/github/stars/seu-usuario/seu-repositorio?style=for-the-badge)](https://github.com/seu-usuario/seu-repositorio/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/seu-usuario/seu-repositorio?style=for-the-badge)](https://github.com/seu-usuario/seu-repositorio/network)
-[![License](https://img.shields.io/github/license/seu-usuario/seu-repositorio?style=for-the-badge)](https://github.com/seu-usuario/seu-repositorio/blob/main/LICENSE)
+![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)
+![Bash](https://img.shields.io/badge/Bash-4EAA25?style=for-the-badge&logo=gnu-bash&logoColor=white)
 
 Bem-vindo ao meu laboratório de experimentos e testes com Linux! Este repositório contém diversos scripts, configurações e documentações de testes que realizo para aprender e dominar o sistema operacional Linux.
 
