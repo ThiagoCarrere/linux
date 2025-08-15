@@ -1,22 +1,21 @@
 #!/bin/bash
 
-# ===== CONFIGURAÇÕES PRINCIPAIS =====
-TIMEZONE="America/Sao_Paulo"
+# Configurações
 CONFIG_FILE="/.codes/conf.exp"
+TIMEZONE="America/Sao_Paulo"
 
-# Listas (arrays)
+# Lista de pacotes
 PACKAGES=("neofetch" "net-tools" "samba" "lm-sensors" "openssh-server" "rsync")
-SERVICES=("cron.service" "smbd.service" "ssh.service")
 
-# Mapeamento: [Marcador]="Mensagem original;Arquivo"
+# Mapeamento: [Marcador]="Arquivo de destino"
 declare -A CONFIG_MAP=(
-    ["#CRONTAB"]="Adicionando agendamentos de crontab.;/etc/crontab"
-    ["#BASHRC"]="Adicionando configuracoes e aliases..;/root/.bashrc"
-    ["#FSTAB"]="Adicionando configurações de montagem de discos...;/etc/fstab"
-    ["#SAMBA"]="Adicionando mapeamentos do Samba....;/etc/samba/smb.conf"
+    ["#CRONTAB"]="/etc/crontab"
+    ["#BASHRC"]="/root/.bashrc"
+    ["#FSTAB"]="/etc/fstab"
+    ["#SAMBA"]="/etc/samba/smb.conf"
 )
 
-# ===== FUNÇÕES =====
+# Função para instalar pacotes
 install_packages() {
     echo "Instalando pacotes necessários..."
     apt update -y && apt upgrade -y
@@ -25,41 +24,39 @@ install_packages() {
     done
 }
 
-apply_config() {
+# Função para adicionar configurações (AGORA CORRETA)
+add_config() {
     local marker="$1"
-    local msg_file="${CONFIG_MAP[$marker]}"
-    local message="${msg_file%;*}"  # Mensagem original
-    local target_file="${msg_file#*;}"  # Arquivo de destino
-
-    echo "$message"
-    sed -n "/$marker/,/$marker/p" "$CONFIG_FILE" | sed "/$marker/d" >> "$target_file"
-    sleep 2  # Pausa igual ao seu script original
+    local target_file="$2"
+    
+    echo "Adicionando configurações em $target_file..."
+    
+    # Extrai o bloco INTEIRO (com marcadores) e adiciona ao FINAL do arquivo
+    sed -n "/$marker/,/$marker/p" "$CONFIG_FILE" >> "$target_file"
+    echo "" >> "$target_file"  # Adiciona linha vazia para separação
+    sleep 2
 }
 
+# Reinicia serviços
 restart_services() {
     echo "Reiniciando serviços..."
-    for service in "${SERVICES[@]}"; do
-        if systemctl is-active --quiet "$service"; then
-            systemctl restart "$service"
-        else
-            echo "[AVISO] Serviço $service não está ativo."
-        fi
-    done
+    systemctl restart cron.service smbd.service ssh.service
 }
 
-# ===== EXECUÇÃO PRINCIPAL =====
-echo "Iniciando a instalação de programas e importação das configurações..."
+# --- Execução principal ---
+echo "Iniciando importação das configurações..."
 
+# Instala pacotes
 install_packages
 
-# Aplica configurações COM PAUSAS (igual ao seu original)
+# Adiciona cada configuração
 for marker in "${!CONFIG_MAP[@]}"; do
-    apply_config "$marker"  # Já inclui o sleep 2 dentro da função
+    add_config "$marker" "${CONFIG_MAP[$marker]}"
 done
 
-# Finalização
+# Configurações finais
 timedatectl set-timezone "$TIMEZONE"
 restart_services
 source ~/.bashrc
 
-echo "Importação e configuração concluída com sucesso!"
+echo "Importação concluída com sucesso!"
