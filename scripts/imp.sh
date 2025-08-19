@@ -5,7 +5,7 @@ CONFIG_FILE="/.codes/conf.exp"
 TIMEZONE="America/Sao_Paulo"
 
 # Lista de pacotes
-PACKAGES=("neofetch" "net-tools" "samba" "lm-sensors" "openssh-server" "rsync")
+PACKAGES=("neofetch" "net-tools" "samba" "lm-sensors" "openssh-server" "rsync" "btop")
 
 # Mapeamento: [Marcador]="Arquivo de destino"
 declare -A CONFIG_MAP=(

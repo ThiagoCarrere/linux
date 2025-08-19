@@ -1,0 +1,128 @@
+#CRONTAB
+#0 5 * * 3 root /.codes/reboot.sh
+#0 6 * * 3 root /.codes/bkp.sh
+#CRONTAB
+
+
+#FSTAB
+#/dev/sda /mnt/caminhoHD/ ext4 defaults 0 0
+#FSTAB
+
+#SAMBA
+#[fuck]
+#path = /mnt/caminho/
+#read only = no
+#guest ok = yes
+#SAMBA
+
+
+#BASHRC
+alias egrep='egrep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias grep='grep --color=auto'
+alias hdfree='limpar; free -lh; echo "=========="; df -hT'
+alias info='cd /; clear; source ~/.bashrc'
+alias l='ls -CF'
+alias la='ls -A'
+alias limpar='cd /; clear; ls'
+alias ll='ls -alF'
+alias ls='ls --color=auto'
+alias rce='nano ~/.bashrc'
+alias sair='limpar; history -c; history -w; exit'
+alias uu='apt update; apt upgrade -y'
+alias rs='systemctl restart smbd.service ssh.service cron.service; limpar'
+alias lg='clear; head -n 10 /.codes/bkp.log; printf "%0.s=" {1..75}; echo; head -n 10 /.codes/reboot.log'
+alias tm='du -csh'
+alias tms='du -csh /mnt/*; printf "%0.s=" {1..50}; echo; du -sh /mnt/*/* | sort -rh'
+alias del='rm -rv'
+
+#look() {
+#    find "$1" -type f -iname "*$2*"
+#}
+
+
+look() {
+    find /mnt/ -type f -iname "*$1*" 2>/dev/null
+}
+
+
+# Exibir data e hora
+echo -e "\n\033[1;32mBem-vindo root\033[0m"
+echo -e "\033[1;32m==============================================\033[0m"
+echo -e "\033[1;34mData: \033[1;37m$(date)\033[0m"
+echo -e "\033[1;34mHostname: \033[1;37m$(hostname)\033[0m"
+echo -e "\033[1;34mIP: \033[1;37m$(hostname -I | awk '{print $1}')\033[0m"
+echo -e "\033[1;34mUsuário: \033[1;37m$(whoami)\033[0m"
+echo -e "\033[1;34mSistema: \033[1;37m$(lsb_release -d | cut -f2-)\033[0m"
+
+
+
+# Tempo de atividade do servidor
+uptime_time=$(uptime -p | sed 's/up //')
+echo -e "\033[1;34mTempo de atividade: \033[1;37m$uptime_time\033[0m"
+
+# Temperatura
+echo -e "\033[1;34mTemperatura: \033[1;37m$(sensors | grep 'temp1' | awk '{print $2}')\033[0m"
+
+
+# Uso de discos específicos
+#echo -e "\033[1;34mUso de discos:\033[0m"
+#df -h | awk '/\/dev\/(nvme0n1p2|sda|sdb|sdc)/ {gsub("/dev/","",$1); printf "\033[1;37m%s: %s | %s | %s\n", $1, $2, $3, $5}'
+#df -h | awk '/\/dev\/(nvme0n1p2|sda|sdb|sdc)/ {gsub("/dev/","",$1);
+#    if ($1 == "nvme0n1p2") $1="nvme";
+#    printf "\033[1;37m%s: %s | %s | %s\n", $1, $2, $3, $5}'
+# Uso de discos específicos
+echo -e "\033[1;34mUso de discos:\033[0m"
+df -h | awk '/\/dev\/(nvme0n1p2|sda|sdb|sdc)/ {gsub("/dev/","",$1);
+    if ($1 == "nvme0n1p2") $1="m2";
+    # Coloca os rótulos dos discos em vermelho
+    printf "\033[1;31m%s\033[0m: \033[1;37m%s | %s | %s\n", $1, $2, $3, $5}' | sort -t '|' -k1,1 -k1.1,1n -k1.2,1n
+
+# Uso de memória formatado com cores
+mem_info=$(free -m | awk 'FNR==2 {printf "\033[1;34mMemória: \033[1;37m%dMi | %dMi | \033[1;37m%.2f%%\n", $3, $2, $3/$2 * 100>
+echo -e "${mem_info}\033[0m"
+
+echo -e "\033[1;34mProcessos: \033[1;37m$(ps aux | wc -l)\033[0m"
+echo -e "\033[1;34mUsuários logados: \033[1;37m$(who | wc -l)\033[0m"
+#echo -e "\033[1;32m====================================\033[0m"
+
+# Monitorando uso de rede (download e upload) utilizando /proc/net/dev
+#echo -e "\n\033[1;32m====================================\033[0m"
+echo -e "\033[1;34mUso da rede:\033[0m"
+
+
+# Defina a interface correta abaixo
+interface="eno1"  # Ajuste para sua interface de rede, como eth0 ou wlan0
+
+# Lendo as estatísticas de /proc/net/dev
+stats_before=$(awk -v iface="$interface" '$1 ~ iface {print $2, $10}' /proc/net/dev)
+bytes_received_before=$(echo $stats_before | awk '{print $1}')
+bytes_sent_before=$(echo $stats_before | awk '{print $2}')
+
+# Pausando por 1 segundo para calcular a diferença
+sleep 1
+
+# Lendo novamente as estatísticas
+stats_after=$(awk -v iface="$interface" '$1 ~ iface {print $2, $10}' /proc/net/dev)
+bytes_received_after=$(echo $stats_after | awk '{print $1}')
+bytes_sent_after=$(echo $stats_after | awk '{print $2}')
+
+# Calculando a diferença para obter o tráfego
+received_diff=$((bytes_received_after - bytes_received_before))
+sent_diff=$((bytes_sent_after - bytes_sent_before))
+
+# Convertendo para Megabytes (MB)
+received_mb=$(echo "scale=2; $received_diff / 1024 / 1024" | bc)
+sent_mb=$(echo "scale=2; $sent_diff / 1024 / 1024" | bc)
+
+# Convertendo para Megabits (Mb)
+received_mb_bits=$(echo "scale=2; $received_diff / 128 / 1024" | bc)
+sent_mb_bits=$(echo "scale=2; $sent_diff / 128 / 1024" | bc)
+
+# Exibindo o tráfego em MB/s e Mb/s
+#echo -e "\033[1;31mDownload: \033[0m$received_mb MB/s \033[1;32mUpload: \033[0m$sent_mb MB/s"
+echo -e "\033[1;31mDownload: \033[0m$received_mb_bits Mb/s \033[1;31mUpload: \033[0m$sent_mb_bits Mb/s"
+echo -e "\033[1;32m==============================================\033[0m"
+#BASHRC
+
+
