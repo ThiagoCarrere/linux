@@ -5,7 +5,7 @@ CONFIG_FILE="/.codes/conf.exp"
 TIMEZONE="America/Sao_Paulo"
 
 # Lista de pacotes
-PACKAGES=("neofetch" "net-tools" "samba" "lm-sensors" "openssh-server" "rsync" "btop")
+PACKAGES=("neofetch" "net-tools" "samba" "lm-sensors" "bc" "openssh-server" "rsync" "btop" "curl")
 
 # Mapeamento: [Marcador]="Arquivo de destino"
 declare -A CONFIG_MAP=(
@@ -59,4 +59,4 @@ timedatectl set-timezone "$TIMEZONE"
 restart_services
 source ~/.bashrc
 
-echo "Importação concluída com sucesso!"
+echo "Importação concluída com sucesso!"!"
